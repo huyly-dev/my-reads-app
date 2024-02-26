@@ -1,8 +1,12 @@
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import ChangeStatusBook from "./ChangeStatusBook";
 
 const BookShelf = ({ books, type, onChangeStatusBook }) => {
-
+  let navigate = useNavigate();
+  const onNavigate = (bookId) => {
+    navigate(`/${bookId}`);
+  };
   const renderListBooks = books.map((item) => (
     <li key={item.id}>
       <div className="book">
@@ -12,13 +16,19 @@ const BookShelf = ({ books, type, onChangeStatusBook }) => {
             style={{
               width: 128,
               height: 193,
-              backgroundImage: `url(${item.imageLinks.thumbnail})`,
+              backgroundImage: `url(${item.imageLinks?.thumbnail})`,
             }}
+            onClick={() => onNavigate(item.id)}
           ></div>
-          <ChangeStatusBook book={item} onChangeStatusBook={onChangeStatusBook}/>
+          <ChangeStatusBook
+            book={item}
+            onChangeStatusBook={onChangeStatusBook}
+          />
         </div>
         <div className="book-title">{item.title}</div>
-        <div className="book-authors">{item.authors[0]}</div>
+        <div className="book-authors">
+          {item.authors ? item.authors.join(", ") : ""}
+        </div>
       </div>
     </li>
   ));
@@ -38,7 +48,7 @@ const BookShelf = ({ books, type, onChangeStatusBook }) => {
 BookShelf.propTypes = {
   books: PropTypes.array.isRequired,
   type: PropTypes.string.isRequired,
-  onChangeStatusBook: PropTypes.func.isRequired
+  onChangeStatusBook: PropTypes.func.isRequired,
 };
 
 export default BookShelf;

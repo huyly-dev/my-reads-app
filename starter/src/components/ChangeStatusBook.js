@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { SHELFS } from "../utils/Shelf";
 
 const ChangeStatusBook = ({ book, onChangeStatusBook }) => {
   return (
@@ -10,10 +11,11 @@ const ChangeStatusBook = ({ book, onChangeStatusBook }) => {
         <option value="disabled" disabled>
           Move to...
         </option>
-        <option value="currentlyReading">Currently Reading</option>
-        <option value="wantToRead">Want to Read</option>
-        <option value="read">Read</option>
-        <option value="none">None</option>
+        {SHELFS.map((item) => (
+          <option key={item.id} value={item.shelfName}>
+            {item.shelfDisplayName}
+          </option>
+        ))}
       </select>
     </div>
   );

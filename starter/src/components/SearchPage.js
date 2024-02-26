@@ -4,31 +4,45 @@ import { Link } from "react-router-dom";
 import * as BooksAPI from "../utils/BooksAPI";
 import ChangeStatusBook from "./ChangeStatusBook";
 
-const SearchPage = ({ onChangeStatusBook }) => {
+const DEBOUNCE_TIME = 400;
+
+const SearchPage = ({ allBooks, onChangeStatusBook }) => {
   const [query, setQuery] = useState("");
   const [books, setBooks] = useState([]);
+  const [error, setError] = useState(false);
 
   const updateQuery = (query) => {
-    setQuery(query.trim());
+    setQuery(query);
   };
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const searchBooks = async () => {
-        const res = await BooksAPI.search(query);
+        try {
+          const res = await BooksAPI.search(query.trim());
+          if (res?.error) {
+            setBooks([]);
+            setError(true);
+          } else {
+            const booksFound = res.map((item) => {
+              const bookFound = allBooks.find((book) => book.id === item.id);
+              if (bookFound) return bookFound;
+              return item;
+            });
 
-        if (res?.error) {
-          setBooks([]);
-        } else {
-          setBooks(res);
+            setBooks(booksFound);
+            setError(false);
+          }
+        } catch (error) {
+          setError(true);
         }
       };
       searchBooks();
-    }, 300);
+    }, DEBOUNCE_TIME);
     return () => {
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [allBooks, query]);
 
   const renderListBooks = books
     ? books.map((item) => (
@@ -73,13 +87,16 @@ const SearchPage = ({ onChangeStatusBook }) => {
         </div>
       </div>
       <div className="search-books-results">
-        <ol className="books-grid">{renderListBooks}</ol>
+        <ol className="books-grid">
+          {error ? <div>Book not found</div> : renderListBooks}
+        </ol>
       </div>
     </div>
   );
 };
 
 SearchPage.propTypes = {
+  allBooks: PropTypes.array.isRequired,
   onChangeStatusBook: PropTypes.func.isRequired,
 };
 
